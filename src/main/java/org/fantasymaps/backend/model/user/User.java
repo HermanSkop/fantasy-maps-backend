@@ -5,8 +5,11 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import org.fantasymaps.backend.config.AppConfig;
 
 import java.time.LocalDate;
@@ -14,33 +17,36 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Entity
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "app_user")
 public abstract class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private Integer id;
-    @Column(name = "username", nullable = false)
+    @Column(name = "username")
     @NotBlank(message = "Username is mandatory")
     @Pattern(
             regexp = AppConfig.usernamePattern,
             message = AppConfig.usernameMismatchMessage
     )
     private String username;
-    @Column(name = "password", nullable = false)
+    @Column(name = "password")
     @NotBlank(message = "Password is mandatory")
     @Pattern(
             regexp = AppConfig.passwordPattern,
             message = AppConfig.passwordMismatchMessage
     )
     private String password;
-    @Column(name = "email", nullable = false)
+    @Column(name = "email")
     @NotBlank(message = "Email is mandatory")
     @Email(message = "Email is invalid")
     private String email;
-    @Column(name = "is_verified_email", nullable = false)
+    @Column(name = "is_verified_email")
     private boolean isVerifiedEmail;
-    @Column(name = "date_created", nullable = false)
-    @NotNull(message = "Date created is mandatory")
+    @Column(name = "date_created")
+    @NotNull(message = "Date is mandatory")
     private LocalDate date;
 }

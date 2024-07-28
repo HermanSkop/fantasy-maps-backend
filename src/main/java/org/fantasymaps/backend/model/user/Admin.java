@@ -13,11 +13,11 @@ import java.util.List;
 public class Admin {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private Integer id;
     @ElementCollection
     //@CollectionTable(name = "permissions", joinColumns = @JoinColumn(name = "admin_id"))
     @Enumerated(EnumType.STRING)
-    @Column(name = "permission", nullable = false)
+    @Column(name = "permission")
     private List<Permission> permissions;
 }
