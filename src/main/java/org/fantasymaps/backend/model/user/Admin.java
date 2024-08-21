@@ -9,12 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "admin")
-public class Admin {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    private Integer id;
+public class Admin extends User {
     @ElementCollection
     //@CollectionTable(name = "permissions", joinColumns = @JoinColumn(name = "admin_id"))
     @Enumerated(EnumType.STRING)
