@@ -2,6 +2,7 @@ package org.fantasymaps.backend.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.fantasymaps.backend.controllers.UserController;
+import org.fantasymaps.backend.dtos.AuthRequestDto;
 import org.fantasymaps.backend.dtos.UserDto;
 import org.fantasymaps.backend.repositories.user.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -23,11 +24,12 @@ public class UserService {
     }
 
     public UserDto getUserById(int id) {
-        try {
             return modelMapper.map(userRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("User not found")), UserDto.class);
-        } catch (EntityNotFoundException _) {
-            return null;
-        }
+    }
+
+    public int authenticateUser(AuthRequestDto authRequestDto) {
+        return userRepository.findByUsernameAndPassword(authRequestDto.getUsername(), authRequestDto.getPassword())
+                .orElseThrow(() -> new EntityNotFoundException("User not found")).getId();
     }
 }
