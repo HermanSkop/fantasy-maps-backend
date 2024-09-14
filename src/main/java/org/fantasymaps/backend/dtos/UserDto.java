@@ -24,4 +24,5 @@ public class UserDto implements Serializable {
     String email;
     boolean isVerifiedEmail;
     Role role;
+    String token;
 }
