@@ -42,15 +42,21 @@ public class UserService {
     }
 
     public int registerUser(RegisterRequestDto registerRequestDto) {
-        User user = null;
+        User user;
         if (registerRequestDto.getRole() == Role.CREATOR)
             user = modelMapper.map(registerRequestDto, Creator.class);
         else if (registerRequestDto.getRole() == Role.CUSTOMER)
             user = modelMapper.map(registerRequestDto, Customer.class);
-        else{
+        else {
             logger.error("Error registering user: Invalid role");
             throw new IllegalArgumentException("Invalid role");
         }
+
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            logger.error("Error registering user: Username already exists");
+            throw new IllegalArgumentException("Username already exists");
+        }
+
         user.setDate(LocalDate.now());
         return userRepository.save(user).getId();
     }
