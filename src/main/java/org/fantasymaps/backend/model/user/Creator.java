@@ -26,11 +26,9 @@ import java.util.Set;
 @AllArgsConstructor
 public class Creator extends User {
     @Column(name = "avatar")
-    @NotBlank(message = "Avatar url is mandatory")
     @Pattern(regexp = AppConfig.urlPattern, message = AppConfig.urlMismatchMessage)
     private String avatarUrl;
     @Column(name = "description")
-    @NotBlank(message = "Description is mandatory")
     private String description;
 
     @OneToMany(mappedBy = "creator", cascade = {CascadeType.PERSIST, CascadeType.MERGE})

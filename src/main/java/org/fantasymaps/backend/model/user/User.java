@@ -41,7 +41,6 @@ public abstract class User {
     )
     private String password;
     @Column(name = "email")
-    @NotBlank(message = "Email is mandatory")
     @Email(message = "Email is invalid")
     private String email;
     @Column(name = "is_verified_email")

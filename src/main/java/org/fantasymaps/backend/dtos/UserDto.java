@@ -7,9 +7,6 @@ import lombok.*;
 
 import java.io.Serializable;
 
-/**
- * DTO for {@link org.fantasymaps.backend.model.user.User}
- */
 @Getter
 @Setter
 @AllArgsConstructor
@@ -20,9 +17,8 @@ public class UserDto implements Serializable {
     @NotBlank(message = "Username is mandatory")
     String username;
     @Email(message = "Email is invalid")
-    @NotBlank(message = "Email is mandatory")
     String email;
-    boolean isVerifiedEmail;
+    boolean isVerifiedEmail = false;
     Role role;
     String token;
 }

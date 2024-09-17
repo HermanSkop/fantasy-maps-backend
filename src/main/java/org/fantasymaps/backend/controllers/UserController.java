@@ -2,6 +2,7 @@ package org.fantasymaps.backend.controllers;
 
 import jakarta.servlet.http.HttpSession;
 import org.fantasymaps.backend.dtos.AuthRequestDto;
+import org.fantasymaps.backend.dtos.RegisterRequestDto;
 import org.fantasymaps.backend.dtos.UserDto;
 import org.fantasymaps.backend.services.UserService;
 import org.slf4j.Logger;
@@ -18,12 +19,10 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
-    private final SessionRepository<? extends Session> sessionRepository;
 
     @Autowired
-    public UserController(UserService userService, SessionRepository<? extends Session> sessionRepository) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.sessionRepository = sessionRepository;
     }
 
     @GetMapping("/{id}")
@@ -47,6 +46,18 @@ public class UserController {
             return ResponseEntity.ok(user);
         } catch (Exception e) {
             logger.error("Error authenticating user: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<UserDto> registerUser(@RequestBody RegisterRequestDto registerRequestDto, HttpSession httpSession) {
+        try {
+            int userId = userService.registerUser(registerRequestDto);
+            UserDto user = userService.getUserById(userId);
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            logger.error("Error registering user: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
