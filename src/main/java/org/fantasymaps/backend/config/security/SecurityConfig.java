@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user/authenticate", "/logout", "/user/register").permitAll()
+                        .requestMatchers("/user/authenticate", "/logout", "/user/register", "/maps").permitAll()
                         .requestMatchers("/map").hasAnyAuthority("CREATOR", "ADMIN")
                         .anyRequest().authenticated()
                 )
