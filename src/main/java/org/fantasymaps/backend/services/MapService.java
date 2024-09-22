@@ -49,7 +49,7 @@ public class MapService {
      * @return map id
      * @throws IOException if file is empty or invalid
      */
-    public int saveMap(MultipartFile file, int creatorId) throws IOException {
+    public int saveMap(MultipartFile file, int creatorId) throws IOException, IllegalArgumentException {
         if (file == null || file.isEmpty())
             throw new IllegalArgumentException("File is empty");
         else if (!Objects.equals(file.getContentType(), "image/png") && !Objects.equals(file.getContentType(), "image/jpeg") && !Objects.equals(file.getContentType(), "image/jpg"))

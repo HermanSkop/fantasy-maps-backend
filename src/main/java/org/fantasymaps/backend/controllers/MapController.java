@@ -40,7 +40,6 @@ public class MapController {
                         mapService.saveMap(file, user.getId())
                 ), MapDto.class)
         );
-
     }
 
     @GetMapping("/maps")

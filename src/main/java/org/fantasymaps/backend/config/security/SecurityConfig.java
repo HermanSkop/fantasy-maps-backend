@@ -39,7 +39,8 @@ public class SecurityConfig {
                         })
                         .logoutSuccessHandler((request, response, authentication) -> response.setStatus(HttpServletResponse.SC_OK))
                 )
-                .addFilterBefore(new SessionTokenFilter(sessionRepository), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new SessionTokenFilter(sessionRepository), UsernamePasswordAuthenticationFilter.class)
+                .csrf(AbstractHttpConfigurer::disable);
         return http.build();
     }
 
