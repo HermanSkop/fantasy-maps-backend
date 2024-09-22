@@ -4,7 +4,6 @@ import org.fantasymaps.backend.dtos.UserDto;
 import org.fantasymaps.backend.model.user.Admin;
 import org.fantasymaps.backend.model.user.Creator;
 import org.fantasymaps.backend.model.user.Customer;
-import org.fantasymaps.backend.model.user.User;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

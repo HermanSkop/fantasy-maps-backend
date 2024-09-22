@@ -1,41 +1,67 @@
 package org.fantasymaps.backend.controllers;
 
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.Bucket;
-import com.google.firebase.cloud.StorageClient;
-import org.springframework.http.HttpStatus;
+import jakarta.servlet.http.HttpSession;
+import org.fantasymaps.backend.dtos.MapDto;
+import org.fantasymaps.backend.dtos.UserDto;
+import org.fantasymaps.backend.repositories.product.MapRepository;
+import org.fantasymaps.backend.services.MapService;
+import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Objects;
+import java.util.Arrays;
+import java.util.Set;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/map")
 public class MapController {
-    @PostMapping
-    public ResponseEntity<String> uploadMap(@RequestParam("file") MultipartFile file) {
-        try {
-            if (file == null || file.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("File is empty");
-            } else if (!Objects.requireNonNull(file.getContentType()).startsWith("image/")) {
-                // TODO specify allowed file types
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("File must be an image");
+    private final MapService mapService;
+    private final ModelMapper modelMapper;
+    private final MapRepository mapRepository;
+    private static final Logger logger = LoggerFactory.getLogger(MapController.class);
+
+    @Autowired
+    public MapController(MapService mapService, ModelMapper modelMapper, MapRepository mapRepository) {
+        this.mapService = mapService;
+        this.modelMapper = modelMapper;
+        this.mapRepository = mapRepository;
+    }
+
+    @PostMapping("/map")
+    public ResponseEntity<MapDto> uploadMap(@RequestParam("file") MultipartFile file, HttpSession session) throws IOException {
+        UserDto user = (UserDto) session.getAttribute("user");
+        return ResponseEntity.ok(modelMapper.map(
+                mapRepository.findById(
+                        mapService.saveMap(file, user.getId())
+                ), MapDto.class)
+        );
+
+    }
+
+    @GetMapping("/maps")
+    public ResponseEntity<Set<MapDto>> getMaps(@RequestParam long page) {
+        Set<MapDto> maps = mapService.getMaps(page, 20);
+        return ResponseEntity.ok(maps);
+    }
+
+    @PostMapping("/maps")
+    public ResponseEntity<MapDto> createMaps(@RequestParam("files") MultipartFile[] files, HttpSession session) {
+        UserDto user = (UserDto) session.getAttribute("user");
+        Arrays.stream(files).forEach(file -> {
+            try {
+                modelMapper.map(
+                        mapRepository.findById(
+                                mapService.saveMap(file, user.getId())
+                        ), MapDto.class);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-
-            String fileName = file.getOriginalFilename();
-            InputStream content = file.getInputStream();
-
-            Bucket bucket = StorageClient.getInstance().bucket();
-            Blob blob = bucket.create(fileName, content, file.getContentType());
-
-            String fileUrl = blob.getMediaLink();
-            return ResponseEntity.ok(fileUrl);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File upload failed");
-        }
+        });
+        return ResponseEntity.ok().build();
     }
 }

@@ -41,9 +41,6 @@ public class SecurityConfig {
                         })
                         .logoutSuccessHandler((request, response, authentication) -> response.setStatus(HttpServletResponse.SC_OK))
                 )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
-                )
                 .addFilterBefore(new SessionTokenFilter(sessionRepository), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

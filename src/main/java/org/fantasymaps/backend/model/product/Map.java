@@ -30,7 +30,6 @@ public class Map extends Product {
     @Embedded
     private MapSize size;
     @Column(name = "description")
-    @NotBlank(message = "Description cannot be blank")
     private String description;
     @Column(name = "map_image_url")
     @NotBlank(message = "Map image URL cannot be blank")

@@ -9,8 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.session.Session;
-import org.springframework.session.SessionRepository;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
@@ -51,14 +49,15 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserDto> registerUser(@RequestBody RegisterRequestDto registerRequestDto, HttpSession httpSession) {
+    public ResponseEntity<UserDto> registerUser(@RequestBody RegisterRequestDto registerRequestDto) {
+        int userId;
         try {
-            int userId = userService.registerUser(registerRequestDto);
-            UserDto user = userService.getUserById(userId);
-            return ResponseEntity.ok(user);
+            userId = userService.registerUser(registerRequestDto);
         } catch (Exception e) {
             logger.error("Error registering user: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
         }
+        UserDto user = userService.getUserById(userId);
+        return ResponseEntity.ok(user);
     }
 }

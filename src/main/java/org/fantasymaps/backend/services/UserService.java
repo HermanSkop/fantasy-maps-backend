@@ -6,7 +6,6 @@ import org.fantasymaps.backend.dtos.AuthRequestDto;
 import org.fantasymaps.backend.dtos.RegisterRequestDto;
 import org.fantasymaps.backend.dtos.Role;
 import org.fantasymaps.backend.dtos.UserDto;
-import org.fantasymaps.backend.model.user.Admin;
 import org.fantasymaps.backend.model.user.Creator;
 import org.fantasymaps.backend.model.user.Customer;
 import org.fantasymaps.backend.model.user.User;

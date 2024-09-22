@@ -14,6 +14,7 @@ public class UserConverter {
     // Common conversion logic
     private UserDto mapUserToUserDto(User source) {
         UserDto destination = new UserDto();
+        destination.setId(source.getId());
         destination.setUsername(source.getUsername());
         destination.setEmail(source.getEmail());
         destination.setVerifiedEmail(source.isVerifiedEmail());
