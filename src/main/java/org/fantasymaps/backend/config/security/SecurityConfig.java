@@ -1,13 +1,10 @@
 package org.fantasymaps.backend.config.security;
 
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import org.jboss.logging.BasicLogger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -38,6 +35,7 @@ public class SecurityConfig {
                         .addLogoutHandler((request, response, authentication) -> {
                             String sessionId = request.getHeader("X-Auth-Token");
                             if (sessionId != null) sessionRepository.deleteById(sessionId);
+                            request.getSession().invalidate();
                         })
                         .logoutSuccessHandler((request, response, authentication) -> response.setStatus(HttpServletResponse.SC_OK))
                 )
