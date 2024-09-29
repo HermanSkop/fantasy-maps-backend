@@ -19,4 +19,5 @@ public class MapDto {
     @NotBlank(message = "Map image URL cannot be blank")
     @Pattern(regexp = AppConfig.urlPattern, message = AppConfig.urlMismatchMessage)
     private String mapUrl;
+    private Boolean isFavorite;
 }

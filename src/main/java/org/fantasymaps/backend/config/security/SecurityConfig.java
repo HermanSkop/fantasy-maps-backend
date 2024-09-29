@@ -29,6 +29,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/user/authenticate", "/logout", "/user/register", "/maps").permitAll()
                         .requestMatchers("/map").hasAnyAuthority("CREATOR", "ADMIN")
+                        .requestMatchers("/map/*/favorite").hasAnyAuthority("CUSTOMER")
                         .anyRequest().authenticated()
                 )
                 .logout((logout) -> logout

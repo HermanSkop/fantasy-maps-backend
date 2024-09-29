@@ -32,13 +32,15 @@ public class MapService {
     private final ModelMapper modelMapper;
     private final CategoryRepository categoryRepository;
     private final CreatorRepository creatorRepository;
+    private final UserService userService;
 
     @Autowired
-    public MapService(MapRepository mapRepository, ModelMapper modelMapper, CategoryRepository categoryRepository, CreatorRepository creatorRepository) {
+    public MapService(MapRepository mapRepository, ModelMapper modelMapper, CategoryRepository categoryRepository, CreatorRepository creatorRepository, UserService userService) {
         this.mapRepository = mapRepository;
         this.modelMapper = modelMapper;
         this.categoryRepository = categoryRepository;
         this.creatorRepository = creatorRepository;
+        this.userService = userService;
     }
 
 
@@ -109,6 +111,17 @@ public class MapService {
         blob.getMediaLink();
     }
 
+    public Set<MapDto> getMaps(long page, long size, int userId) {
+        if (page < 0 || size < 0)
+            throw new IllegalArgumentException("Invalid page or size");
+        return mapRepository.findAll().stream()
+                .skip(page * size)
+                .limit(size)
+                .map(map -> modelMapper.map(map, MapDto.class))
+                .peek(mapDto -> mapDto.setIsFavorite(userService.isFavorite(mapDto.getId(), userId)))
+                .collect(Collectors.toSet());
+    }
+
     public Set<MapDto> getMaps(long page, long size) {
         if (page < 0 || size < 0)
             throw new IllegalArgumentException("Invalid page or size");
@@ -118,4 +131,6 @@ public class MapService {
                 .map(map -> modelMapper.map(map, MapDto.class))
                 .collect(Collectors.toSet());
     }
+
+
 }
