@@ -3,6 +3,7 @@ package org.fantasymaps.backend.config.security;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -27,8 +28,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user/authenticate", "/logout", "/user/register", "/maps").permitAll()
-                        .requestMatchers("/map").hasAnyAuthority("CREATOR", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/maps", "/map/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/user/authenticate", "/logout", "/user/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/map").hasAnyAuthority("CREATOR", "ADMIN")
                         .requestMatchers("/map/*/favorite").hasAnyAuthority("CUSTOMER")
                         .anyRequest().authenticated()
                 )

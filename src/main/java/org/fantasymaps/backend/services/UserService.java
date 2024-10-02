@@ -69,6 +69,8 @@ public class UserService {
 
     public Boolean isFavorite(int id, int userId) {
         return userRepository.findById(userId).map(user -> {
+            if (user.getClass() != Customer.class)
+                throw new IllegalArgumentException("User is not a customer");
             Customer customer = (Customer) user;
             return customer.getFavoredProducts().stream().anyMatch(map -> map.getId() == id);
         }).orElse(false);

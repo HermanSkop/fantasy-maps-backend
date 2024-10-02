@@ -1,6 +1,7 @@
 package org.fantasymaps.backend.controllers;
 
 import jakarta.servlet.http.HttpSession;
+import org.fantasymaps.backend.dtos.MapDetailsDto;
 import org.fantasymaps.backend.dtos.MapDto;
 import org.fantasymaps.backend.dtos.Role;
 import org.fantasymaps.backend.dtos.UserDto;
@@ -46,6 +47,15 @@ public class MapController {
         );
     }
 
+    @GetMapping("/map/{id}")
+    public ResponseEntity<MapDetailsDto> getMap(@PathVariable int id, HttpSession session) {
+        UserDto user = (UserDto) session.getAttribute("user");
+        if (user == null)
+            return ResponseEntity.ok(mapService.getMapDetails(id));
+        else
+            return ResponseEntity.ok(mapService.getMapDetails(id, user.getId()));
+    }
+
     @GetMapping("/maps")
     public ResponseEntity<Set<MapDto>> getMaps(@RequestParam long page, HttpSession session) {
         UserDto user = (UserDto) session.getAttribute("user");
@@ -67,12 +77,5 @@ public class MapController {
 
         userService.favoriteMap(id, user.getId(), isFavorite);
         return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/map/{id}")
-    public ResponseEntity<MapDto> getMap(@PathVariable int id) {
-        return ResponseEntity.ok(modelMapper.map(
-                mapRepository.findById(id).orElseThrow(() -> new RuntimeException("Map not found")), MapDto.class)
-        );
     }
 }

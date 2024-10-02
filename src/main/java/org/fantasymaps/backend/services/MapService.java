@@ -3,11 +3,12 @@ package org.fantasymaps.backend.services;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
 import com.google.firebase.cloud.StorageClient;
-import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.fantasymaps.backend.dtos.MapDetailsDto;
 import org.fantasymaps.backend.dtos.MapDto;
+import org.fantasymaps.backend.dtos.Role;
 import org.fantasymaps.backend.model.product.Map;
 import org.fantasymaps.backend.repositories.CategoryRepository;
 import org.fantasymaps.backend.repositories.product.MapRepository;
@@ -133,4 +134,13 @@ public class MapService {
     }
 
 
+    public MapDetailsDto getMapDetails(int mapId, int userId) {
+        MapDetailsDto mapDetails = modelMapper.map(mapRepository.findById(mapId).orElseThrow(), MapDetailsDto.class);
+        if (userService.getUserById(userId).getRole().equals(Role.CUSTOMER))
+            mapDetails.setIsFavorite(userService.isFavorite(mapId, userId));
+        return mapDetails;
+    }
+    public MapDetailsDto getMapDetails(int mapId) {
+        return modelMapper.map(mapRepository.findById(mapId).orElseThrow(), MapDetailsDto.class);
+    }
 }
