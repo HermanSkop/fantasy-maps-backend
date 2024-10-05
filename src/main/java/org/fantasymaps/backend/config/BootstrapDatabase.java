@@ -70,12 +70,12 @@ public class BootstrapDatabase implements CommandLineRunner {
     }
 
     private void createBundles(Set<Map> maps) {
-        Set<Bundle> bundles = Set.of(Bundle.builder().name("Bundle 1").price(1.0).date(LocalDate.now().minusDays(3)).creator(maps.iterator().next().getCreator()).maps(maps).build(), Bundle.builder().name("Bundle 2").price(2.5).date(LocalDate.now().minusDays(7)).creator(maps.iterator().next().getCreator()).maps(maps).build(), Bundle.builder().name("Bundle 3").price(4.0).date(LocalDate.now().minusDays(10)).creator(maps.iterator().next().getCreator()).maps(maps).build());
+        Set<Bundle> bundles = Set.of(Bundle.builder().name("Bundle 1").price(1.0).dateCreated(LocalDate.now().minusDays(3)).creator(maps.iterator().next().getCreator()).maps(maps).build(), Bundle.builder().name("Bundle 2").price(2.5).dateCreated(LocalDate.now().minusDays(7)).creator(maps.iterator().next().getCreator()).maps(maps).build(), Bundle.builder().name("Bundle 3").price(4.0).dateCreated(LocalDate.now().minusDays(10)).creator(maps.iterator().next().getCreator()).maps(maps).build());
         productRepository.saveAll(bundles);
     }
 
     private void createMaps(Creator creator, Set<Category> categories) {
-        Set<Map> maps = Set.of(Map.builder().name("Map 1").price(1.0).date(LocalDate.now().minusDays(2)).creator(creator).description("A detailed city map with landmarks.").mapUrl("public/map1.png").categories(categories).build(), Map.builder().name("Map 2").price(2.0).date(LocalDate.now().minusDays(5)).creator(creator).description("A topographical map of the mountain region.").mapUrl("public/map2.png").categories(categories).build(), Map.builder().name("Map 3").price(3.0).date(LocalDate.now().minusDays(8)).creator(creator).description("A historical map showing the evolution of a region.").mapUrl("public/map3.png").categories(categories).build());
+        Set<Map> maps = Set.of(Map.builder().name("Map 1").price(1.0).dateCreated(LocalDate.now().minusDays(2)).creator(creator).description("A detailed city map with landmarks.").url("public/map1.png").categories(categories).build(), Map.builder().name("Map 2").price(2.0).dateCreated(LocalDate.now().minusDays(5)).creator(creator).description("A topographical map of the mountain region.").url("public/map2.png").categories(categories).build(), Map.builder().name("Map 3").price(3.0).dateCreated(LocalDate.now().minusDays(8)).creator(creator).description("A historical map showing the evolution of a region.").url("public/map3.png").categories(categories).build());
         productRepository.saveAll(maps);
     }
 

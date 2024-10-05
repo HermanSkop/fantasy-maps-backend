@@ -28,10 +28,11 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/maps", "/map/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/maps", "/map/*", "/user").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user/authenticate", "/logout", "/user/register").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/map").hasAnyAuthority("CREATOR", "ADMIN")
-                        .requestMatchers("/map/*/favorite").hasAnyAuthority("CUSTOMER")
+                        .requestMatchers(HttpMethod.GET, "/maps/creator/{id}").hasAnyAuthority("CREATOR")
+                        .requestMatchers(HttpMethod.POST, "/map").hasAnyAuthority("CREATOR")
+                        .requestMatchers(HttpMethod.POST,"/map/*/favorite").hasAnyAuthority("CUSTOMER")
                         .anyRequest().authenticated()
                 )
                 .logout((logout) -> logout

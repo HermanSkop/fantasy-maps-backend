@@ -1,10 +1,7 @@
 package org.fantasymaps.backend.controllers;
 
 import jakarta.servlet.http.HttpSession;
-import org.fantasymaps.backend.dtos.MapDetailsDto;
-import org.fantasymaps.backend.dtos.MapDto;
-import org.fantasymaps.backend.dtos.Role;
-import org.fantasymaps.backend.dtos.UserDto;
+import org.fantasymaps.backend.dtos.*;
 import org.fantasymaps.backend.repositories.product.MapRepository;
 import org.fantasymaps.backend.services.MapService;
 import org.fantasymaps.backend.services.UserService;
@@ -28,6 +25,7 @@ public class MapController {
     private final MapRepository mapRepository;
     private static final Logger logger = LoggerFactory.getLogger(MapController.class);
     private final UserService userService;
+    private final int pageSize = 20;
 
     @Autowired
     public MapController(MapService mapService, ModelMapper modelMapper, MapRepository mapRepository, UserService userService) {
@@ -61,10 +59,18 @@ public class MapController {
         UserDto user = (UserDto) session.getAttribute("user");
         Set<MapDto> maps;
         if (user == null || !user.getRole().equals(Role.CUSTOMER))
-            maps = mapService.getMaps(page, 20);
+            maps = mapService.getMaps(page, pageSize);
         else
-            maps = mapService.getMaps(page, 20, user.getId());
+            maps = mapService.getMaps(user.getId(), page, pageSize);
         return ResponseEntity.ok(maps);
+    }
+
+    @GetMapping("/maps/creator/{id}")
+    public ResponseEntity<Set<ManageMapItemDto>> getMapsByCreator(@PathVariable int id, @RequestParam long page, HttpSession session) {
+        UserDto user = (UserDto) session.getAttribute("user");
+        if (user == null || !user.getRole().equals(Role.CREATOR))
+            throw new IllegalArgumentException("You are not a creator");
+        return ResponseEntity.ok(mapService.getMapsByCreator(id, page, pageSize));
     }
 
     @PostMapping("/map/{id}/favorite")

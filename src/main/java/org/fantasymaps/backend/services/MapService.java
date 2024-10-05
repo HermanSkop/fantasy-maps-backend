@@ -6,6 +6,7 @@ import com.google.firebase.cloud.StorageClient;
 import lombok.NonNull;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.fantasymaps.backend.dtos.ManageMapItemDto;
 import org.fantasymaps.backend.dtos.MapDetailsDto;
 import org.fantasymaps.backend.dtos.MapDto;
 import org.fantasymaps.backend.dtos.Role;
@@ -65,8 +66,8 @@ public class MapService {
         return mapRepository.save(
                 Map.builder()
                         .name("Placeholder") // TODO get map name from user
-                        .mapUrl(mapFileName)
-                        .date(LocalDate.now())
+                        .url(mapFileName)
+                        .dateCreated(LocalDate.now())
                         .creator(creatorRepository.findById(creatorId).orElseThrow())
                         .categories(new HashSet<>(categoryRepository.findAll()))
                         .build()
@@ -112,7 +113,7 @@ public class MapService {
         blob.getMediaLink();
     }
 
-    public Set<MapDto> getMaps(long page, long size, int userId) {
+    public Set<MapDto> getMaps(int userId, long page, long size) {
         if (page < 0 || size < 0)
             throw new IllegalArgumentException("Invalid page or size");
         return mapRepository.findAll().stream()
@@ -142,5 +143,15 @@ public class MapService {
     }
     public MapDetailsDto getMapDetails(int mapId) {
         return modelMapper.map(mapRepository.findById(mapId).orElseThrow(), MapDetailsDto.class);
+    }
+
+    public Set<ManageMapItemDto> getMapsByCreator(int creatorId, long page, int size) {
+        if (page < 0 || size < 0)
+            throw new IllegalArgumentException("Invalid page or size");
+        return mapRepository.findAllByCreatorId(creatorId).stream()
+                .skip(page * size)
+                .limit(size)
+                .map(map -> modelMapper.map(map, ManageMapItemDto.class))
+                .collect(Collectors.toSet());
     }
 }

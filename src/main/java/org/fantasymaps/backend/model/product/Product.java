@@ -32,7 +32,7 @@ public abstract class Product {
     private Double price;
     @Column(name = "date_created")
     @NotNull(message = "Date is mandatory")
-    private LocalDate date;
+    private LocalDate dateCreated;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "creator_id")
