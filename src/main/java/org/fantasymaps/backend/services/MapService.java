@@ -154,4 +154,11 @@ public class MapService {
                 .map(map -> modelMapper.map(map, ManageMapItemDto.class))
                 .collect(Collectors.toSet());
     }
+
+    public void deleteMap(int mapId, int creatorId) {
+        Map map = mapRepository.findById(mapId).orElseThrow();
+        if (map.getCreator().getId() != creatorId)
+            throw new IllegalArgumentException("Only creators can delete their maps");
+        mapRepository.delete(map);
+    }
 }

@@ -30,8 +30,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/maps", "/map/*", "/user").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user/authenticate", "/logout", "/user/register").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/maps/creator/{id}").hasAnyAuthority("CREATOR")
+                        .requestMatchers(HttpMethod.GET, "/maps/manage/creator/{id}").hasAnyAuthority("CREATOR")
                         .requestMatchers(HttpMethod.POST, "/map").hasAnyAuthority("CREATOR")
+                        .requestMatchers(HttpMethod.DELETE, "/map/{id}").hasAnyAuthority("CREATOR", "ADMIN")
                         .requestMatchers(HttpMethod.POST,"/map/*/favorite").hasAnyAuthority("CUSTOMER")
                         .anyRequest().authenticated()
                 )

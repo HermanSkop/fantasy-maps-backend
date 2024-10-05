@@ -35,6 +35,14 @@ public class MapController {
         this.userService = userService;
     }
 
+    @DeleteMapping("/map/{id}")
+    public ResponseEntity<Void> deleteMap(@PathVariable int id, HttpSession session) {
+        UserDto user = (UserDto) session.getAttribute("user");
+        logger.info("User {} is deleting map {}", user.getId(), id);
+        mapService.deleteMap(id, user.getId());
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/map")
     public ResponseEntity<MapDto> uploadMap(@RequestParam("file") MultipartFile file, HttpSession session) throws IOException {
         UserDto user = (UserDto) session.getAttribute("user");
@@ -65,11 +73,8 @@ public class MapController {
         return ResponseEntity.ok(maps);
     }
 
-    @GetMapping("/maps/creator/{id}")
-    public ResponseEntity<Set<ManageMapItemDto>> getMapsByCreator(@PathVariable int id, @RequestParam long page, HttpSession session) {
-        UserDto user = (UserDto) session.getAttribute("user");
-        if (user == null || !user.getRole().equals(Role.CREATOR))
-            throw new IllegalArgumentException("You are not a creator");
+    @GetMapping("/maps/manage/creator/{id}")
+    public ResponseEntity<Set<ManageMapItemDto>> getManageMapsByCreator(@PathVariable int id, @RequestParam long page, HttpSession session) {
         return ResponseEntity.ok(mapService.getMapsByCreator(id, page, pageSize));
     }
 
