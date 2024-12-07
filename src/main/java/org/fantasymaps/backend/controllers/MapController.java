@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
+import static org.fantasymaps.backend.config.AppConfig.pageSize;
+
 @CrossOrigin
 @RestController
 public class MapController {
@@ -25,7 +27,7 @@ public class MapController {
     private final MapRepository mapRepository;
     private static final Logger logger = LoggerFactory.getLogger(MapController.class);
     private final UserService userService;
-    private final int pageSize = 20;
+
 
     @Autowired
     public MapController(MapService mapService, ModelMapper modelMapper, MapRepository mapRepository, UserService userService) {
@@ -38,7 +40,6 @@ public class MapController {
     @DeleteMapping("/map/{id}")
     public ResponseEntity<Void> deleteMap(@PathVariable int id, HttpSession session) {
         UserDto user = (UserDto) session.getAttribute("user");
-        logger.info("User {} is deleting map {}", user.getId(), id);
         mapService.deleteMap(id, user.getId());
         return ResponseEntity.ok().build();
     }
@@ -74,8 +75,8 @@ public class MapController {
     }
 
     @GetMapping("/maps/manage/creator/{id}")
-    public ResponseEntity<Set<ManageMapItemDto>> getManageMapsByCreator(@PathVariable int id, @RequestParam long page, HttpSession session) {
-        return ResponseEntity.ok(mapService.getMapsByCreator(id, page, pageSize));
+    public ResponseEntity<Set<ManageMapItemDto>> getManageMapsByCreator(@PathVariable int id, @RequestParam long page) {
+        return ResponseEntity.ok(mapService.getManageMapsByCreator(id, page, pageSize));
     }
 
     @PostMapping("/map/{id}/favorite")

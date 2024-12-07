@@ -145,7 +145,7 @@ public class MapService {
         return modelMapper.map(mapRepository.findById(mapId).orElseThrow(), MapDetailsDto.class);
     }
 
-    public Set<ManageMapItemDto> getMapsByCreator(int creatorId, long page, int size) {
+    public Set<ManageMapItemDto> getManageMapsByCreator(int creatorId, long page, int size) {
         if (page < 0 || size < 0)
             throw new IllegalArgumentException("Invalid page or size");
         return mapRepository.findAllByCreatorId(creatorId).stream()

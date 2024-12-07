@@ -55,7 +55,7 @@ public class BootstrapDatabase implements CommandLineRunner {
         createCategories();
         createTags();
         createMaps(creatorRepository.findById(1).orElseThrow(), new HashSet<>(categoryRepository.findAll()));
-        createBundles(mapRepository.findByCreator_Id(1));
+        createBundles(mapRepository.findByCreatorId(1));
         createCustomers();
     }
 

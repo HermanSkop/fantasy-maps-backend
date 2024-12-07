@@ -21,7 +21,6 @@ import java.util.Set;
 @AllArgsConstructor
 public class Bundle extends Product {
     @Column(name = "name")
-    @NotBlank(message = "Name cannot be blank")
     @Pattern(regexp = AppConfig.namePattern, message = AppConfig.nameMismatchMessage)
     private String name;
 
@@ -30,14 +29,4 @@ public class Bundle extends Product {
             joinColumns = @JoinColumn(name = "bundle_id"),
             inverseJoinColumns = @JoinColumn(name = "maps_id"))
     private Set<Map> maps = new LinkedHashSet<>();
-
-    @Override
-    @PrePersist
-    public void prePersist() {
-        super.prePersist();
-        if (this.getMaps() == null || this.getMaps().isEmpty())
-            throw new IllegalArgumentException("Bundle must contain at least one map");
-        if (this.getMaps().contains(null))
-            throw new IllegalArgumentException("Bundle cannot contain null maps");
-    }
 }

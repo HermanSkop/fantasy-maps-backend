@@ -22,6 +22,8 @@ public class AppConfig implements WebMvcConfigurer {
     public static final String nameMismatchMessage = "Name must contain only letters, numbers, and spaces";
     public static final String urlMismatchMessage = "TODO";
 
+    public static final int pageSize = 20;
+
     @Bean
     public ModelMapper modelMapper(UserConverter userConverter) {
         ModelMapper modelMapper = new ModelMapper();
