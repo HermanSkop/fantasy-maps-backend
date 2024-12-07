@@ -16,7 +16,6 @@ import java.util.Set;
 @NoArgsConstructor
 public class ManageBundleItemDto {
     private int id;
-    @NotBlank(message = "Name cannot be blank")
     private String name;
     private LocalDate dateCreated;
     private Double price;

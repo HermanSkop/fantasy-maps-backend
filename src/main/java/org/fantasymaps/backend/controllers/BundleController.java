@@ -35,7 +35,7 @@ public class BundleController {
     }
 
     @PostMapping("/bundle")
-    public ResponseEntity<ManageBundleItemDto> createBundle(@RequestBody CreateBundleDto bundleDto) {
+    public ResponseEntity<Integer> createBundle(@RequestBody CreateBundleDto bundleDto) {
         UserDto user = (UserDto) session.getAttribute("user");
         logger.info("Maps: " + bundleDto.getMaps().size());
         try {

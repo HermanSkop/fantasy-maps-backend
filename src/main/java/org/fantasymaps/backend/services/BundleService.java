@@ -44,7 +44,7 @@ public class BundleService {
                 .collect(Collectors.toSet());
     }
 
-    public ManageBundleItemDto createBundle(CreateBundleDto bundleDto) {
+    public int createBundle(CreateBundleDto bundleDto) {
         bundleDto.getMaps().forEach(mapId -> {
             if (mapId == null) throw new IllegalArgumentException("Map id cannot be null");
         });
@@ -56,7 +56,7 @@ public class BundleService {
         Bundle bundle = modelMapper.map(bundleDto, Bundle.class);
         bundle.setMaps(mapRepository.findAllByIdIn(bundleDto.getMaps()));
         bundle.setDateCreated(LocalDate.now());
-        return modelMapper.map(bundleRepository.save(bundle), ManageBundleItemDto.class);
 
+        return bundleRepository.save(bundle).getId();
     }
 }
