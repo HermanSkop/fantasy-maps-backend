@@ -19,7 +19,6 @@ public class MapDetailsDto {
     @NotBlank(message = "Name cannot be blank")
     private String name;
     @NotBlank(message = "Map image URL cannot be blank")
-    @Pattern(regexp = AppConfig.urlPattern, message = AppConfig.urlMismatchMessage)
     private String url;
     private Boolean isFavorite;
     private Set<TagDto> tags;

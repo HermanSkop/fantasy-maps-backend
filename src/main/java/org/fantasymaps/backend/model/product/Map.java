@@ -33,7 +33,6 @@ public class Map extends Product {
     private String description;
     @Column(name = "map_image_url")
     @NotBlank(message = "Map image URL cannot be blank")
-    @Pattern(regexp = AppConfig.urlPattern, message = AppConfig.urlMismatchMessage)
     private String url;
 
     @ManyToMany

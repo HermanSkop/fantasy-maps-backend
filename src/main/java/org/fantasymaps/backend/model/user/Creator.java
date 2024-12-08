@@ -26,7 +26,6 @@ import java.util.Set;
 @AllArgsConstructor
 public class Creator extends User {
     @Column(name = "avatar")
-    @Pattern(regexp = AppConfig.urlPattern, message = AppConfig.urlMismatchMessage)
     private String avatarUrl;
     @Column(name = "description")
     private String description;

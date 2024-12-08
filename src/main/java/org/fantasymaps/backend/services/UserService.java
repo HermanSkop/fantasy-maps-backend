@@ -1,6 +1,7 @@
 package org.fantasymaps.backend.services;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.fantasymaps.backend.config.AppConfig;
 import org.fantasymaps.backend.controllers.UserController;
 import org.fantasymaps.backend.dtos.AuthRequestDto;
 import org.fantasymaps.backend.dtos.RegisterRequestDto;
@@ -51,6 +52,8 @@ public class UserService {
 
         if (userRepository.findByUsername(user.getUsername()).isPresent())
             throw new IllegalArgumentException("Username already exists");
+        if (!user.getPassword().matches(AppConfig.passwordPattern))
+            throw new IllegalArgumentException(AppConfig.passwordMismatchMessage);
 
         user.setDate(LocalDate.now());
         return userRepository.save(user).getId();

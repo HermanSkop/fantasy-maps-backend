@@ -7,16 +7,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.fantasymaps.backend.config.AppConfig;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class MapDto {
-    private int id;
+public class CreateMapDto {
     @NotBlank(message = "Name cannot be blank")
+    @Pattern(regexp = AppConfig.namePattern, message = "Invalid name")
     private String name;
-    @NotBlank(message = "Map image URL cannot be blank")
-    private String url;
-    private Boolean isFavorite;
+    private String description;
+    private Double price;
+    private MultipartFile file;
+    private MapSizeDto size;
+
 }
