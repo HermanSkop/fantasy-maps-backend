@@ -2,8 +2,6 @@ package org.fantasymaps.backend.services;
 
 import org.fantasymaps.backend.dtos.CreateBundleDto;
 import org.fantasymaps.backend.dtos.ManageBundleItemDto;
-import org.fantasymaps.backend.dtos.ManageMapItemDto;
-import org.fantasymaps.backend.dtos.MapDto;
 import org.fantasymaps.backend.model.product.Bundle;
 import org.fantasymaps.backend.model.product.Map;
 import org.fantasymaps.backend.repositories.product.BundleRepository;
@@ -20,12 +18,10 @@ public class BundleService {
     private final BundleRepository bundleRepository;
     private final MapRepository mapRepository;
     private final ModelMapper modelMapper;
-    private final MapService mapService;
 
-    public BundleService(BundleRepository bundleRepository, ModelMapper modelMapper, MapService mapService, MapRepository mapRepository) {
+    public BundleService(BundleRepository bundleRepository, ModelMapper modelMapper, MapRepository mapRepository) {
         this.bundleRepository = bundleRepository;
         this.modelMapper = modelMapper;
-        this.mapService = mapService;
         this.mapRepository = mapRepository;
     }
 
@@ -38,13 +34,15 @@ public class BundleService {
                 .limit(pageSize)
                 .map(bundle -> {
                     ManageBundleItemDto bundleDto = modelMapper.map(bundle, ManageBundleItemDto.class);
-                    bundleDto.setCoverMapsUrls(bundle.getMaps().stream().map(Map::getUrl).collect(Collectors.toSet()));
+                    bundleDto.setCoverMapsUrls(bundle.getMaps().stream().limit(5).map(Map::getUrl).collect(Collectors.toSet()));
                     return bundleDto;
                 })
                 .collect(Collectors.toSet());
     }
 
     public int createBundle(CreateBundleDto bundleDto) {
+        if (bundleDto.getMaps()==null || bundleDto.getMaps().isEmpty())
+            throw new IllegalArgumentException("Bundle must contain at least one map");
         bundleDto.getMaps().forEach(mapId -> {
             if (mapId == null) throw new IllegalArgumentException("Map id cannot be null");
         });
@@ -58,5 +56,11 @@ public class BundleService {
         bundle.setDateCreated(LocalDate.now());
 
         return bundleRepository.save(bundle).getId();
+    }
+
+    public void deleteBundle(int bundleId, int creatorId) {
+        Bundle bundle = bundleRepository.findById(bundleId).orElseThrow();
+        if (bundle.getCreator().getId() != creatorId) throw new IllegalArgumentException("Unauthorized");
+        bundleRepository.delete(bundle);
     }
 }

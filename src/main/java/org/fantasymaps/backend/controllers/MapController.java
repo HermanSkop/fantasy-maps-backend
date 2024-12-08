@@ -9,6 +9,7 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,12 +45,14 @@ public class MapController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/map")
-    public ResponseEntity<MapDto> uploadMap(@RequestParam("file") MultipartFile file, HttpSession session) throws IOException {
+    @PostMapping(value = "/map", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<MapDto> uploadMap(@RequestPart("file") MultipartFile map, @RequestPart("map") CreateMapDto createMapDto, HttpSession session) throws IOException {
         UserDto user = (UserDto) session.getAttribute("user");
+        logger.info(createMapDto.getSize().toString());
+        createMapDto.setFile(map);
         return ResponseEntity.ok(modelMapper.map(
                 mapRepository.findById(
-                        mapService.saveMap(file, user.getId())
+                        mapService.saveMap(createMapDto, user.getId())
                 ), MapDto.class)
         );
     }

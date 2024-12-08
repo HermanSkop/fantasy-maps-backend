@@ -6,11 +6,9 @@ import com.google.firebase.cloud.StorageClient;
 import lombok.NonNull;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.fantasymaps.backend.dtos.ManageMapItemDto;
-import org.fantasymaps.backend.dtos.MapDetailsDto;
-import org.fantasymaps.backend.dtos.MapDto;
-import org.fantasymaps.backend.dtos.Role;
+import org.fantasymaps.backend.dtos.*;
 import org.fantasymaps.backend.model.product.Map;
+import org.fantasymaps.backend.model.product.MapSize;
 import org.fantasymaps.backend.repositories.CategoryRepository;
 import org.fantasymaps.backend.repositories.product.MapRepository;
 import org.fantasymaps.backend.repositories.user.CreatorRepository;
@@ -49,27 +47,36 @@ public class MapService {
     /**
      * Save map image to Firebase Storage and store map details in database
      *
-     * @param file map image file
+     * @param createMapDto map details
      * @return map id
      * @throws IOException if file is empty or invalid
      */
-    public int saveMap(MultipartFile file, int creatorId) throws IOException, IllegalArgumentException {
-        if (file == null || file.isEmpty())
+    public int saveMap(CreateMapDto createMapDto, int creatorId) throws IOException, IllegalArgumentException {
+        if (createMapDto == null)
+            throw new IllegalArgumentException("Map details are empty");
+        else if (createMapDto.getFile() == null || createMapDto.getFile().isEmpty())
             throw new IllegalArgumentException("File is empty");
-        else if (!Objects.equals(file.getContentType(), "image/png") && !Objects.equals(file.getContentType(), "image/jpeg") && !Objects.equals(file.getContentType(), "image/jpg"))
+        else if (!Objects.equals(createMapDto.getFile().getContentType(), "image/png") && !Objects.equals(createMapDto.getFile().getContentType(), "image/jpeg") && !Objects.equals(createMapDto.getFile().getContentType(), "image/jpg"))
             throw new IllegalArgumentException("Invalid file type");
+        if (createMapDto.getSize() != null){
+            if (createMapDto.getSize().getWidthSquares() <= 0 || createMapDto.getSize().getHeightSquares() <= 0 || createMapDto.getSize().getSquareSideLength() <= 0)
+                throw new IllegalArgumentException("Invalid map size");
+        }
 
-        String mapFileName = RandomStringUtils.randomAlphanumeric(10) + file.getContentType().replace("image/", ".");
-        saveMapToFirebase(file, "original/" + mapFileName);
-        saveMapToFirebase(resizeImage(file, mapFileName), "preview/" + mapFileName);
+        String mapFileName = RandomStringUtils.randomAlphanumeric(10) + createMapDto.getFile().getContentType().replace("image/", ".");
+        saveMapToFirebase(createMapDto.getFile(), "original/" + mapFileName);
+        saveMapToFirebase(resizeImage(createMapDto.getFile(), mapFileName), "preview/" + mapFileName);
 
         return mapRepository.save(
                 Map.builder()
-                        .name("Placeholder") // TODO get map name from user
+                        .name(createMapDto.getName())
                         .url(mapFileName)
                         .dateCreated(LocalDate.now())
                         .creator(creatorRepository.findById(creatorId).orElseThrow())
                         .categories(new HashSet<>(categoryRepository.findAll()))
+                        .price(createMapDto.getPrice())
+                        .description(createMapDto.getDescription())
+                        .size(createMapDto.getSize() != null ? modelMapper.map(createMapDto.getSize(), MapSize.class) : null)
                         .build()
         ).getId();
     }
@@ -158,7 +165,7 @@ public class MapService {
     public void deleteMap(int mapId, int creatorId) {
         Map map = mapRepository.findById(mapId).orElseThrow();
         if (map.getCreator().getId() != creatorId)
-            throw new IllegalArgumentException("Only creators can delete their maps");
+            throw new IllegalArgumentException("Unauthorized");
         mapRepository.delete(map);
     }
 }

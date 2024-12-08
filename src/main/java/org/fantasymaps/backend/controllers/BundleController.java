@@ -20,24 +20,20 @@ public class BundleController {
 
     private final BundleService bundleService;
     private final Logger logger = Logger.getLogger(BundleController.class.getName());
-    private final HttpSession session;
 
     @Autowired
-    public BundleController(BundleService bundleService, HttpSession session) {
+    public BundleController(BundleService bundleService) {
         this.bundleService = bundleService;
-        this.session = session;
     }
 
     @GetMapping("/bundles/manage/creator/{id}")
     public ResponseEntity<Set<ManageBundleItemDto>> getManageBundlesByCreator(@PathVariable int id, @RequestParam long page) {
-        logger.info(bundleService.getManageBundlesByCreator(id, page, pageSize).toString());
         return ResponseEntity.ok(bundleService.getManageBundlesByCreator(id, page, pageSize));
     }
 
     @PostMapping("/bundle")
-    public ResponseEntity<Integer> createBundle(@RequestBody CreateBundleDto bundleDto) {
+    public ResponseEntity<Integer> createBundle(@RequestBody CreateBundleDto bundleDto, HttpSession session) {
         UserDto user = (UserDto) session.getAttribute("user");
-        logger.info("Maps: " + bundleDto.getMaps().size());
         try {
             bundleDto.setCreatorId(user.getId());
             return ResponseEntity.ok(bundleService.createBundle(bundleDto));
@@ -46,5 +42,12 @@ public class BundleController {
             logger.warning(e.getMessage());
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @DeleteMapping("/bundle/{id}")
+    public ResponseEntity<Void> deleteBundle(@PathVariable int id, HttpSession session) {
+        UserDto user = (UserDto) session.getAttribute("user");
+        bundleService.deleteBundle(id, user.getId());
+        return ResponseEntity.ok().build();
     }
 }
