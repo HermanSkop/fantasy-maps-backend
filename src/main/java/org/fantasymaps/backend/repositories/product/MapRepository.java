@@ -1,6 +1,7 @@
 package org.fantasymaps.backend.repositories.product;
 
 import org.fantasymaps.backend.model.product.Map;
+import org.fantasymaps.backend.model.user.Customer;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -14,5 +15,5 @@ public interface MapRepository extends JpaRepository<Map, Integer> {
 
     Set<Map> findAllByIdIn(Set<Integer> ids);
 
-
+    Set<Map> findAllByFavoredCustomers(Set<Customer> favoredCustomers);
 }

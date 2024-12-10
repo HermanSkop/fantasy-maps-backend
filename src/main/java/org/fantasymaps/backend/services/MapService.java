@@ -7,11 +7,16 @@ import lombok.NonNull;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.fantasymaps.backend.dtos.*;
+import org.fantasymaps.backend.model.Tag;
 import org.fantasymaps.backend.model.product.Map;
 import org.fantasymaps.backend.model.product.MapSize;
+import org.fantasymaps.backend.model.user.Customer;
+import org.fantasymaps.backend.model.user.User;
 import org.fantasymaps.backend.repositories.CategoryRepository;
+import org.fantasymaps.backend.repositories.TagRepository;
 import org.fantasymaps.backend.repositories.product.MapRepository;
 import org.fantasymaps.backend.repositories.user.CreatorRepository;
+import org.fantasymaps.backend.repositories.user.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,8 +27,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,14 +40,21 @@ public class MapService {
     private final CategoryRepository categoryRepository;
     private final CreatorRepository creatorRepository;
     private final UserService userService;
+    private final UserRepository userRepository;
+    private final Logger logger = Logger.getLogger(MapService.class.getName());
+    private final TagRepository tagRepository;
 
     @Autowired
-    public MapService(MapRepository mapRepository, ModelMapper modelMapper, CategoryRepository categoryRepository, CreatorRepository creatorRepository, UserService userService) {
+    public MapService(MapRepository mapRepository, ModelMapper modelMapper, CategoryRepository categoryRepository,
+                      CreatorRepository creatorRepository, UserService userService, UserRepository userRepository,
+                      TagRepository tagRepository) {
         this.mapRepository = mapRepository;
         this.modelMapper = modelMapper;
         this.categoryRepository = categoryRepository;
         this.creatorRepository = creatorRepository;
         this.userService = userService;
+        this.userRepository = userRepository;
+        this.tagRepository = tagRepository;
     }
 
 
@@ -131,10 +145,15 @@ public class MapService {
                 .collect(Collectors.toSet());
     }
 
-    public Set<MapDto> getMaps(long page, long size) {
+    public Set<MapDto> getMaps(long page, long size, List<TagDto> tags) {
         if (page < 0 || size < 0)
             throw new IllegalArgumentException("Invalid page or size");
+
+        List<Tag> tagList = tags.stream()
+                .map(tagDto -> modelMapper.map(tagDto, Tag.class))
+                .toList();
         return mapRepository.findAll().stream()
+                .filter(map -> tagList.stream().anyMatch(tag -> map.getTags().contains(tag)))
                 .skip(page * size)
                 .limit(size)
                 .map(map -> modelMapper.map(map, MapDto.class))
@@ -167,5 +186,29 @@ public class MapService {
         if (map.getCreator().getId() != creatorId)
             throw new IllegalArgumentException("Unauthorized");
         mapRepository.delete(map);
+    }
+
+    public Set<MapDto> getFavoriteMaps(int userId, long page, int size) {
+        if (page < 0 || size < 0)
+            throw new IllegalArgumentException("Invalid page or size");
+        try {
+            Customer customer = (Customer) userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+            logger.info(String.valueOf(customer.getFavoredProducts().size()));
+            return mapRepository.findAllByFavoredCustomers(Set.of(customer)).stream()
+                    .skip(page * size)
+                    .limit(size)
+                    .map(map -> modelMapper.map(map, MapDto.class))
+                    .peek(map -> map.setIsFavorite(true))
+                    .collect(Collectors.toSet());
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("User is not a customer");
+        }
+
+    }
+
+    public Set<TagDto> getTags() {
+        return tagRepository.findAll().stream()
+                .map(tag -> modelMapper.map(tag, TagDto.class))
+                .collect(Collectors.toSet());
     }
 }

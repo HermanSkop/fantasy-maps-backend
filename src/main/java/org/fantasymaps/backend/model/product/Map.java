@@ -35,7 +35,7 @@ public class Map extends Product {
     @NotBlank(message = "Map image URL cannot be blank")
     private String url;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(name = "map_tags",
             joinColumns = @JoinColumn(name = "map_id"),
             inverseJoinColumns = @JoinColumn(name = "tags_id"))

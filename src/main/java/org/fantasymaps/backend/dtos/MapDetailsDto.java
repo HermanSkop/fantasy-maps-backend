@@ -1,12 +1,10 @@
 package org.fantasymaps.backend.dtos;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.fantasymaps.backend.config.AppConfig;
 
 import java.util.Set;
 

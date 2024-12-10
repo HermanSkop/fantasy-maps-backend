@@ -21,7 +21,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class BootstrapDatabase implements CommandLineRunner {
@@ -53,7 +55,6 @@ public class BootstrapDatabase implements CommandLineRunner {
         createCreators();
         createSubscriptions(creatorRepository.findById(1).orElseThrow());
         createCategories();
-        createTags();
         createMaps(creatorRepository.findById(1).orElseThrow(), new HashSet<>(categoryRepository.findAll()));
         createBundles(mapRepository.findByCreatorId(1));
         createCustomers();
@@ -75,7 +76,11 @@ public class BootstrapDatabase implements CommandLineRunner {
     }
 
     private void createMaps(Creator creator, Set<Category> categories) {
-        Set<Map> maps = Set.of(Map.builder().name("Map 1").price(1.0).dateCreated(LocalDate.now().minusDays(2)).creator(creator).description("A detailed city map with landmarks.").url("public/map1.png").categories(categories).build(), Map.builder().name("Map 2").price(2.0).dateCreated(LocalDate.now().minusDays(5)).creator(creator).description("A topographical map of the mountain region.").url("public/map2.png").categories(categories).build(), Map.builder().name("Map 3").price(3.0).dateCreated(LocalDate.now().minusDays(8)).creator(creator).description("A historical map showing the evolution of a region.").url("public/map3.png").categories(categories).build());
+        List<Tag> tags = List.of(Tag.builder().name("Popular").build(), Tag.builder().name("New").build(), Tag.builder().name("Public").build());
+        Set<Map> maps = Set.of(
+                Map.builder().name("Map 1").price(1.0).dateCreated(LocalDate.now().minusDays(2)).creator(creator).description("A detailed city map with landmarks.").url("public/map1.png").categories(categories).tags(Set.of(tags.get(0))).build(),
+                Map.builder().name("Map 2").price(2.0).dateCreated(LocalDate.now().minusDays(5)).creator(creator).description("A topographical map of the mountain region.").url("public/map2.png").categories(categories).tags(Set.of(tags.get(1))).build(),
+                Map.builder().name("Map 3").price(3.0).dateCreated(LocalDate.now().minusDays(8)).creator(creator).description("A historical map showing the evolution of a region.").url("public/map3.png").categories(categories).tags(Set.of(tags.get(2))).build());
         productRepository.saveAll(maps);
     }
 

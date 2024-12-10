@@ -1,5 +1,8 @@
 package org.fantasymaps.backend.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
 import org.fantasymaps.backend.dtos.*;
 import org.fantasymaps.backend.repositories.product.MapRepository;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,14 +32,17 @@ public class MapController {
     private final MapRepository mapRepository;
     private static final Logger logger = LoggerFactory.getLogger(MapController.class);
     private final UserService userService;
+    private ObjectMapper objectMapper = new ObjectMapper();
 
 
     @Autowired
-    public MapController(MapService mapService, ModelMapper modelMapper, MapRepository mapRepository, UserService userService) {
+    public MapController(MapService mapService, ModelMapper modelMapper, MapRepository mapRepository, UserService userService,
+                         ObjectMapper objectMapper) {
         this.mapService = mapService;
         this.modelMapper = modelMapper;
         this.mapRepository = mapRepository;
         this.userService = userService;
+        this.objectMapper = objectMapper;
     }
 
     @DeleteMapping("/map/{id}")
@@ -67,14 +74,23 @@ public class MapController {
     }
 
     @GetMapping("/maps")
-    public ResponseEntity<Set<MapDto>> getMaps(@RequestParam long page, HttpSession session) {
+    public ResponseEntity<Set<MapDto>> getMaps(@RequestParam long page, @RequestParam String tags, HttpSession session) throws JsonProcessingException {
+        List<TagDto> filterTags = objectMapper.readValue(tags, objectMapper.getTypeFactory().constructCollectionType(List.class, TagDto.class));
+
         UserDto user = (UserDto) session.getAttribute("user");
         Set<MapDto> maps;
+
         if (user == null || !user.getRole().equals(Role.CUSTOMER))
-            maps = mapService.getMaps(page, pageSize);
+            maps = mapService.getMaps(page, pageSize, filterTags);
         else
             maps = mapService.getMaps(user.getId(), page, pageSize);
         return ResponseEntity.ok(maps);
+    }
+
+    @GetMapping("/maps/favorite")
+    public ResponseEntity<Set<MapDto>> getFavoriteMaps(@RequestParam long page, HttpSession session) {
+        UserDto user = (UserDto) session.getAttribute("user");
+        return ResponseEntity.ok(mapService.getFavoriteMaps(user.getId(), page, pageSize));
     }
 
     @GetMapping("/maps/manage/creator/{id}")
