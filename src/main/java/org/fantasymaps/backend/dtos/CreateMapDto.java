@@ -9,6 +9,8 @@ import lombok.Setter;
 import org.fantasymaps.backend.config.AppConfig;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -21,5 +23,5 @@ public class CreateMapDto {
     private Double price;
     private MultipartFile file;
     private MapSizeDto size;
-
+    private Set<TagDto> tags;
 }

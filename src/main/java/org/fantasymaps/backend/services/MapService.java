@@ -11,7 +11,6 @@ import org.fantasymaps.backend.model.Tag;
 import org.fantasymaps.backend.model.product.Map;
 import org.fantasymaps.backend.model.product.MapSize;
 import org.fantasymaps.backend.model.user.Customer;
-import org.fantasymaps.backend.model.user.User;
 import org.fantasymaps.backend.repositories.CategoryRepository;
 import org.fantasymaps.backend.repositories.TagRepository;
 import org.fantasymaps.backend.repositories.product.MapRepository;
@@ -72,7 +71,7 @@ public class MapService {
             throw new IllegalArgumentException("File is empty");
         else if (!Objects.equals(createMapDto.getFile().getContentType(), "image/png") && !Objects.equals(createMapDto.getFile().getContentType(), "image/jpeg") && !Objects.equals(createMapDto.getFile().getContentType(), "image/jpg"))
             throw new IllegalArgumentException("Invalid file type");
-        if (createMapDto.getSize() != null){
+        if (createMapDto.getSize() != null) {
             if (createMapDto.getSize().getWidthSquares() <= 0 || createMapDto.getSize().getHeightSquares() <= 0 || createMapDto.getSize().getSquareSideLength() <= 0)
                 throw new IllegalArgumentException("Invalid map size");
         }
@@ -91,6 +90,10 @@ public class MapService {
                         .price(createMapDto.getPrice())
                         .description(createMapDto.getDescription())
                         .size(createMapDto.getSize() != null ? modelMapper.map(createMapDto.getSize(), MapSize.class) : null)
+                        .tags(createMapDto.getTags().stream()
+                                .map(tagDto -> tagRepository.findByName(tagDto.getName())
+                                        .orElse(org.fantasymaps.backend.model.Tag.builder().name(tagDto.getName()).build()))
+                                .collect(Collectors.toSet()))
                         .build()
         ).getId();
     }
@@ -146,12 +149,22 @@ public class MapService {
     }
 
     public Set<MapDto> getMaps(long page, long size, List<TagDto> tags) {
-        if (page < 0 || size < 0)
-            throw new IllegalArgumentException("Invalid page or size");
-
+        if (tags == null)
+            throw new IllegalArgumentException("Tags cannot be null");
         List<Tag> tagList = tags.stream()
                 .map(tagDto -> modelMapper.map(tagDto, Tag.class))
                 .toList();
+
+        if (page < 0 || size < 0)
+            throw new IllegalArgumentException("Invalid page or size");
+
+        if (tagList.isEmpty())
+            return mapRepository.findAll().stream()
+                    .skip(page * size)
+                    .limit(size)
+                    .map(map -> modelMapper.map(map, MapDto.class))
+                    .collect(Collectors.toSet());
+
         return mapRepository.findAll().stream()
                 .filter(map -> tagList.stream().anyMatch(tag -> map.getTags().contains(tag)))
                 .skip(page * size)
@@ -167,6 +180,7 @@ public class MapService {
             mapDetails.setIsFavorite(userService.isFavorite(mapId, userId));
         return mapDetails;
     }
+
     public MapDetailsDto getMapDetails(int mapId) {
         return modelMapper.map(mapRepository.findById(mapId).orElseThrow(), MapDetailsDto.class);
     }

@@ -1,7 +1,6 @@
 package org.fantasymaps.backend.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
 import org.fantasymaps.backend.dtos.*;
@@ -55,12 +54,9 @@ public class MapController {
     @PostMapping(value = "/map", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<MapDto> uploadMap(@RequestPart("file") MultipartFile map, @RequestPart("map") CreateMapDto createMapDto, HttpSession session) throws IOException {
         UserDto user = (UserDto) session.getAttribute("user");
-        logger.info(createMapDto.getSize().toString());
         createMapDto.setFile(map);
-        return ResponseEntity.ok(modelMapper.map(
-                mapRepository.findById(
-                        mapService.saveMap(createMapDto, user.getId())
-                ), MapDto.class)
+        return ResponseEntity.ok(
+                modelMapper.map(mapRepository.findById(mapService.saveMap(createMapDto, user.getId())), MapDto.class)
         );
     }
 
