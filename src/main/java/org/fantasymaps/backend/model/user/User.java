@@ -26,7 +26,7 @@ public abstract class User {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     private Integer id;
-    @Column(name = "username")
+    @Column(name = "username", length = AppConfig.usernameMaxLength)
     @NotBlank(message = "Username is mandatory")
     @Pattern(
             regexp = AppConfig.usernamePattern,

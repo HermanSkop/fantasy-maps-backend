@@ -23,13 +23,13 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Map extends Product {
-    @Column(name = "name")
+    @Column(name = "name", length = AppConfig.nameMaxLength)
     @NotBlank(message = "Name cannot be blank")
     @Pattern(regexp = AppConfig.namePattern, message = AppConfig.nameMismatchMessage)
     private String name;
     @Embedded
     private MapSize size;
-    @Column(name = "description")
+    @Column(name = "description", length = AppConfig.descriptionMaxLength)
     private String description;
     @Column(name = "map_image_url")
     @NotBlank(message = "Map image URL cannot be blank")
@@ -47,4 +47,7 @@ public class Map extends Product {
             joinColumns = @JoinColumn(name = "map_id"),
             inverseJoinColumns = @JoinColumn(name = "categories_id"))
     private Set<Category> categories = new LinkedHashSet<>();
+
+    @ManyToMany(mappedBy = "maps")
+    private Set<Bundle> bundles = new LinkedHashSet<>();
 }

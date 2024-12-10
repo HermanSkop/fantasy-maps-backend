@@ -6,10 +6,13 @@ import com.google.firebase.cloud.StorageClient;
 import lombok.NonNull;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.fantasymaps.backend.dtos.*;
 import org.fantasymaps.backend.model.Tag;
+import org.fantasymaps.backend.model.product.Bundle;
 import org.fantasymaps.backend.model.product.Map;
 import org.fantasymaps.backend.model.product.MapSize;
+import org.fantasymaps.backend.model.product.Product;
 import org.fantasymaps.backend.model.user.Customer;
 import org.fantasymaps.backend.repositories.CategoryRepository;
 import org.fantasymaps.backend.repositories.TagRepository;
@@ -25,10 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -92,7 +92,7 @@ public class MapService {
                         .size(createMapDto.getSize() != null ? modelMapper.map(createMapDto.getSize(), MapSize.class) : null)
                         .tags(createMapDto.getTags().stream()
                                 .map(tagDto -> tagRepository.findByName(tagDto.getName())
-                                        .orElse(org.fantasymaps.backend.model.Tag.builder().name(tagDto.getName()).build()))
+                                        .orElse(org.fantasymaps.backend.model.Tag.builder().name(StringUtils.capitalize(tagDto.getName())).build()))
                                 .collect(Collectors.toSet()))
                         .build()
         ).getId();
@@ -137,10 +137,13 @@ public class MapService {
         blob.getMediaLink();
     }
 
-    public Set<MapDto> getMaps(int userId, long page, long size) {
+    public Set<MapDto> getMaps(int userId, long page, long size, List<TagDto> tags) {
         if (page < 0 || size < 0)
             throw new IllegalArgumentException("Invalid page or size");
+        List<Tag> tagList = getActualTags(tags).orElse(new ArrayList<>());
+
         return mapRepository.findAll().stream()
+                .filter(map -> map.getTags().containsAll(tagList))
                 .skip(page * size)
                 .limit(size)
                 .map(map -> modelMapper.map(map, MapDto.class))
@@ -148,31 +151,27 @@ public class MapService {
                 .collect(Collectors.toSet());
     }
 
-    public Set<MapDto> getMaps(long page, long size, List<TagDto> tags) {
+    private Optional<List<Tag>> getActualTags(List<TagDto> tags) {
         if (tags == null)
             throw new IllegalArgumentException("Tags cannot be null");
-        List<Tag> tagList = tags.stream()
-                .map(tagDto -> modelMapper.map(tagDto, Tag.class))
-                .toList();
+        List<Tag> tagList = tags.stream().map(tagDto -> modelMapper.map(tagDto, Tag.class)).toList();
+        if (tagList.isEmpty())
+            return Optional.empty();
+        return Optional.of(tagList);
+    }
 
+    public Set<MapDto> getMapsReduced(long page, long size, List<TagDto> tags) {
         if (page < 0 || size < 0)
             throw new IllegalArgumentException("Invalid page or size");
-
-        if (tagList.isEmpty())
-            return mapRepository.findAll().stream()
-                    .skip(page * size)
-                    .limit(size)
-                    .map(map -> modelMapper.map(map, MapDto.class))
-                    .collect(Collectors.toSet());
+        List<Tag> tagList = getActualTags(tags).orElse(new ArrayList<>());
 
         return mapRepository.findAll().stream()
-                .filter(map -> tagList.stream().anyMatch(tag -> map.getTags().contains(tag)))
+                .filter(map -> map.getTags().containsAll(tagList))
                 .skip(page * size)
                 .limit(size)
                 .map(map -> modelMapper.map(map, MapDto.class))
                 .collect(Collectors.toSet());
     }
-
 
     public MapDetailsDto getMapDetails(int mapId, int userId) {
         MapDetailsDto mapDetails = modelMapper.map(mapRepository.findById(mapId).orElseThrow(), MapDetailsDto.class);
@@ -202,13 +201,15 @@ public class MapService {
         mapRepository.delete(map);
     }
 
-    public Set<MapDto> getFavoriteMaps(int userId, long page, int size) {
+    public Set<MapDto> getFavoriteMaps(int userId, long page, int size, List<TagDto> tags) {
         if (page < 0 || size < 0)
             throw new IllegalArgumentException("Invalid page or size");
         try {
             Customer customer = (Customer) userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
-            logger.info(String.valueOf(customer.getFavoredProducts().size()));
+
+            List<Tag> tagList = getActualTags(tags).orElse(new ArrayList<>());
             return mapRepository.findAllByFavoredCustomers(Set.of(customer)).stream()
+                    .filter(map -> map.getTags().containsAll(tagList))
                     .skip(page * size)
                     .limit(size)
                     .map(map -> modelMapper.map(map, MapDto.class))
@@ -223,6 +224,25 @@ public class MapService {
     public Set<TagDto> getTags() {
         return tagRepository.findAll().stream()
                 .map(tag -> modelMapper.map(tag, TagDto.class))
+                .collect(Collectors.toSet());
+    }
+
+    public Set<MapDto> getBundledMaps(int mapId, long page, int size) {
+        if (page < 0 || size < 0)
+            throw new IllegalArgumentException("Invalid page or size");
+        Set<Bundle> bundles = mapRepository.findById(mapId).orElseThrow(() -> new IllegalArgumentException("Map not found")).getBundles();
+
+        if (bundles.isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        return bundles.stream()
+                .flatMap(bundle -> bundle.getMaps().stream())
+                .distinct()
+                .filter(map -> map.getId() != mapId)
+                .skip(page * size)
+                .limit(size)
+                .map(map -> modelMapper.map(map, MapDto.class))
                 .collect(Collectors.toSet());
     }
 }

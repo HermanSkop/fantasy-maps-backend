@@ -28,7 +28,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/maps", "/map/*", "/user", "/tags").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/maps", "/map/*", "/user", "/tags", "/maps/bundled/*").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user/authenticate", "/logout", "/user/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/maps/manage/creator/{id}", "/bundles/manage/creator/{id}").hasAnyAuthority("CREATOR")
                         .requestMatchers(HttpMethod.POST, "/map", "/bundle").hasAnyAuthority("CREATOR")

@@ -20,4 +20,6 @@ public class MapDetailsDto {
     private String url;
     private Boolean isFavorite;
     private Set<TagDto> tags;
+    private String description;
+    private MapSizeDto size;
 }

@@ -24,7 +24,7 @@ public class Subscription {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     private Integer id;
-    @Column(name = "name")
+    @Column(name = "name", length = AppConfig.nameMaxLength)
     @NotBlank(message = "Name is mandatory")
     @Pattern(regexp = AppConfig.namePattern, message = AppConfig.nameMismatchMessage)
     private String name;

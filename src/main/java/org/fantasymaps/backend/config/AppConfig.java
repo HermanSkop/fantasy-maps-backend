@@ -20,6 +20,10 @@ public class AppConfig implements WebMvcConfigurer {
     public static final String passwordMismatchMessage = "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number";
     public static final String nameMismatchMessage = "Name must contain only letters, numbers, and spaces";
 
+    public static final int nameMaxLength = 50;
+    public static final int descriptionMaxLength = 1000;
+    public static final int usernameMaxLength = 20;
+
     public static final int pageSize = 20;
 
     @Bean

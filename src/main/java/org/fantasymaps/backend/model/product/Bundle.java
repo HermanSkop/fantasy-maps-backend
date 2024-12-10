@@ -20,7 +20,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Bundle extends Product {
-    @Column(name = "name")
+    @Column(name = "name", length = AppConfig.nameMaxLength)
     @Pattern(regexp = AppConfig.namePattern, message = AppConfig.nameMismatchMessage)
     private String name;
 

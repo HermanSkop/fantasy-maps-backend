@@ -2,7 +2,9 @@ package org.fantasymaps.backend.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
+import org.fantasymaps.backend.config.AppConfig;
 import org.fantasymaps.backend.model.product.Map;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -19,8 +21,9 @@ import java.util.Set;
 @Table(name = "tag")
 public class Tag {
     @Id
-    @Column(name = "name")
+    @Column(name = "name", length = AppConfig.nameMaxLength)
     @NotBlank(message = "Name cannot be blank")
+    @Pattern(regexp = AppConfig.namePattern, message = AppConfig.nameMismatchMessage)
     private String name;
 
     @ManyToMany(mappedBy = "tags")

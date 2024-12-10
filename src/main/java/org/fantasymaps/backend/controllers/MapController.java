@@ -77,16 +77,22 @@ public class MapController {
         Set<MapDto> maps;
 
         if (user == null || !user.getRole().equals(Role.CUSTOMER))
-            maps = mapService.getMaps(page, pageSize, filterTags);
+            maps = mapService.getMapsReduced(page, pageSize, filterTags);
         else
-            maps = mapService.getMaps(user.getId(), page, pageSize);
+            maps = mapService.getMaps(user.getId(), page, pageSize, filterTags);
         return ResponseEntity.ok(maps);
     }
 
     @GetMapping("/maps/favorite")
-    public ResponseEntity<Set<MapDto>> getFavoriteMaps(@RequestParam long page, HttpSession session) {
+    public ResponseEntity<Set<MapDto>> getFavoriteMaps(@RequestParam long page, @RequestParam String tags, HttpSession session) throws JsonProcessingException {
         UserDto user = (UserDto) session.getAttribute("user");
-        return ResponseEntity.ok(mapService.getFavoriteMaps(user.getId(), page, pageSize));
+        List<TagDto> filterTags = objectMapper.readValue(tags, objectMapper.getTypeFactory().constructCollectionType(List.class, TagDto.class));
+        return ResponseEntity.ok(mapService.getFavoriteMaps(user.getId(), page, pageSize, filterTags));
+    }
+
+    @GetMapping("/maps/bundled/{mapId}")
+    public ResponseEntity<Set<MapDto>> getBundledMaps(@PathVariable int mapId, @RequestParam long page) {
+        return ResponseEntity.ok(mapService.getBundledMaps(mapId, page, pageSize));
     }
 
     @GetMapping("/maps/manage/creator/{id}")

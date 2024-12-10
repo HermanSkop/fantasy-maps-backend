@@ -24,7 +24,7 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     private Integer id;
-    @Column(name = "name")
+    @Column(name = "name", length = AppConfig.nameMaxLength)
     @Pattern(regexp = AppConfig.namePattern, message = AppConfig.nameMismatchMessage)
     @NotBlank(message = "Name cannot be blank")
     private String name;
