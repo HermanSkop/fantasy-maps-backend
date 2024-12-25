@@ -16,7 +16,7 @@ import java.io.InputStream;
 public class FirebaseConfig {
     @Bean
     public Bucket initializeFirebase() throws IOException {
-        ClassPathResource resource = new ClassPathResource("firebaseServiceAccountKey.json");
+        ClassPathResource resource = new ClassPathResource("fantasy-maps-web-firebase-adminsdk-di3fd-d4c7c15898.json");
         InputStream serviceAccount = resource.getInputStream();
 
         FirebaseOptions options = FirebaseOptions.builder()
