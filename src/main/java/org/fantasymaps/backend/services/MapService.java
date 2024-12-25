@@ -137,6 +137,16 @@ public class MapService {
         blob.getMediaLink();
     }
 
+    public static void deleteMapFromFirebase(@NonNull String fileName) throws IOException {
+        Bucket bucket = StorageClient.getInstance().bucket();
+        Blob blob = bucket.get(fileName);
+        if (blob == null)
+            throw new IllegalArgumentException("File not found");
+        if(!blob.delete())
+            throw new IOException("Error while deleting file");
+    }
+
+
     public Set<MapDto> getMaps(int userId, long page, long size, List<TagDto> tags) {
         if (page < 0 || size < 0)
             throw new IllegalArgumentException("Invalid page or size");
@@ -194,10 +204,13 @@ public class MapService {
                 .collect(Collectors.toSet());
     }
 
-    public void deleteMap(int mapId, int creatorId) {
+    public void deleteMap(int mapId, int creatorId) throws IOException {
         Map map = mapRepository.findById(mapId).orElseThrow();
         if (map.getCreator().getId() != creatorId)
             throw new IllegalArgumentException("Unauthorized");
+        deleteMapFromFirebase("original/" + map.getUrl());
+        deleteMapFromFirebase("preview/" + map.getUrl());
+
         mapRepository.delete(map);
     }
 

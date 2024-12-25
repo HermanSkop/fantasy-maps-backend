@@ -63,4 +63,14 @@ public class BundleService {
         if (bundle.getCreator().getId() != creatorId) throw new IllegalArgumentException("Unauthorized");
         bundleRepository.delete(bundle);
     }
+
+    public void deleteMapFromBundles(int id) {
+        bundleRepository.findAll().forEach(bundle -> {
+            if (bundle.getMaps().stream().anyMatch(map -> map.getId() == id)) {
+                bundle.getMaps().removeIf(map -> map.getId() == id);
+                if (bundle.getMaps().isEmpty()) bundleRepository.delete(bundle);
+                else bundleRepository.save(bundle);
+            }
+        });
+    }
 }

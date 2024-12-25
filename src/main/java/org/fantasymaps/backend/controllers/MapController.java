@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
 import org.fantasymaps.backend.dtos.*;
 import org.fantasymaps.backend.repositories.product.MapRepository;
+import org.fantasymaps.backend.services.BundleService;
 import org.fantasymaps.backend.services.MapService;
 import org.fantasymaps.backend.services.UserService;
 import org.modelmapper.ModelMapper;
@@ -31,22 +32,25 @@ public class MapController {
     private final MapRepository mapRepository;
     private static final Logger logger = LoggerFactory.getLogger(MapController.class);
     private final UserService userService;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+    private final BundleService bundleService;
 
 
     @Autowired
     public MapController(MapService mapService, ModelMapper modelMapper, MapRepository mapRepository, UserService userService,
-                         ObjectMapper objectMapper) {
+                         ObjectMapper objectMapper, BundleService bundleService) {
         this.mapService = mapService;
         this.modelMapper = modelMapper;
         this.mapRepository = mapRepository;
         this.userService = userService;
         this.objectMapper = objectMapper;
+        this.bundleService = bundleService;
     }
 
     @DeleteMapping("/map/{id}")
-    public ResponseEntity<Void> deleteMap(@PathVariable int id, HttpSession session) {
+    public ResponseEntity<Void> deleteMap(@PathVariable int id, HttpSession session) throws IOException {
         UserDto user = (UserDto) session.getAttribute("user");
+        bundleService.deleteMapFromBundles(id);
         mapService.deleteMap(id, user.getId());
         return ResponseEntity.ok().build();
     }
